@@ -121,6 +121,44 @@ class ModalButtonBuilder
         return $this;
     }
 
+    /**
+     * 添加上一条按钮
+     * @param string $title 按钮标题
+     * @param array $attribute 按钮属性
+     * @param mixed $current_id 当前记录ID
+     * @param string $id_key 主键字段名，默认为'id'
+     * @return $this
+     */
+    public function addPrevButton($title, $attribute, $current_id = null, $id_key = 'id'){
+        if (!isset($attribute['class'])) {
+            $attribute['class'] = '';
+        }
+        $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_prev_btn';
+        $attribute['data-current-id'] = $current_id;
+        $attribute['data-id-key'] = $id_key;
+        $attribute['data-operate-type'] = 'prev';
+        return $this->addFooterButton($title, $attribute);
+    }
+
+    /**
+     * 添加下一条按钮
+     * @param string $title 按钮标题
+     * @param array $attribute 按钮属性
+     * @param mixed $current_id 当前记录ID
+     * @param string $id_key 主键字段名，默认为'id'
+     * @return $this
+     */
+    public function addNextButton($title, $attribute, $current_id = null, $id_key = 'id'){
+        if (!isset($attribute['class'])) {
+            $attribute['class'] = '';
+        }
+        $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_next_btn';
+        $attribute['data-current-id'] = $current_id;
+        $attribute['data-id-key'] = $id_key;
+        $attribute['data-operate-type'] = 'next';
+        return $this->addFooterButton($title, $attribute);
+    }
+
     protected function compileHtmlAttr($attr) {
         $result = array();
         foreach ($attr as $key => $value) {

@@ -139,3 +139,12 @@ function submitForm(modalDom, btnId){
         modalDom.find('.modal-body form').submit()
     });
 }
+
+// 在模态框显示时绑定上下条按钮
+$(document).on('shown.bs.modal', '.qs-button-type-modal', function() {
+    if (window.ModalNavigation && typeof window.ModalNavigation.bindPrevNextButtons === 'function') {
+        window.ModalNavigation.bindPrevNextButtons($(this));
+    } else {
+        console.warn('ModalNavigation not available, navigation buttons may not work');
+    }
+});

@@ -60,7 +60,7 @@ const ModalNavigationManager = {
         modalDom.find('.qscmf_modal_nav_btn').each(function() {
             console.log('syncCurrentId',  newId);
 
-            $(this).attr('data-current-id', newId);
+            this.updateCurrentId($(this), newId);
         });
         return newId;
     },
@@ -70,11 +70,11 @@ const ModalNavigationManager = {
         const prevBtn = modalDom.find('.qscmf_modal_nav_prev_btn');
         const nextBtn = modalDom.find('.qscmf_modal_nav_next_btn');
 
-        console.log('updateButtonStates', hasPrev, hasNext);
+        console.log('updateButtonStates', prevBtn, hasPrev, nextBtn, hasNext);
         
         // 更新禁用状态
-        prevBtn.prop('disabled', !hasPrev);
-        nextBtn.prop('disabled', !hasNext);
+        prevBtn.prop('disabled', hasPrev === 0);
+        nextBtn.prop('disabled', hasNext === 0);
     }
 };
 
@@ -117,7 +117,7 @@ const ModalContentUpdater = {
             navButtons.each(function() {
                 const origId = $(this).attr('data-original-id');
                 if (origId !== undefined) {
-                    $(this).attr('data-current-id', origId);
+                    ModalNavigationManager.updateCurrentId($(this), origId);
                 }
             });
 
@@ -263,8 +263,8 @@ class ModalNavigation {
             // 更新按钮状态
             ModalNavigationManager.updateButtonStates(
                 modalDom, 
-                response.has_prev || false, 
-                response.has_next || false
+                response?.has_prev, 
+                response?.has_next
             );
         }
     }

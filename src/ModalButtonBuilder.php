@@ -135,6 +135,7 @@ class ModalButtonBuilder
         }
         $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_prev_btn';
         $attribute['data-current-id'] = $current_id;
+        $attribute['data-original-id'] = $current_id;
         $attribute['data-id-key'] = $id_key;
         $attribute['data-operate-type'] = 'prev';
         return $this->addFooterButton($title, $attribute);
@@ -154,6 +155,7 @@ class ModalButtonBuilder
         }
         $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_next_btn';
         $attribute['data-current-id'] = $current_id;
+        $attribute['data-original-id'] = $current_id;
         $attribute['data-id-key'] = $id_key;
         $attribute['data-operate-type'] = 'next';
         return $this->addFooterButton($title, $attribute);

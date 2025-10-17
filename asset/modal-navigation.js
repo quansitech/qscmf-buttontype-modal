@@ -78,6 +78,75 @@ const ModalContentUpdater = {
     // 触发内容更新事件
     triggerContentUpdated(modalDom) {
         modalDom.trigger('modal.content.updated');
+    },
+
+    // 重置模态框导航状态到初始状态
+    resetNavigationState(modalDom) {
+        // 检查是否存在导航按钮
+        const navButtons = modalDom.find('.qscmf_modal_nav_btn');
+        if (navButtons.length > 0) {
+            // 重置所有导航按钮的当前ID为原始ID
+            navButtons.each(function() {
+                const origId = $(this).attr('data-original-id');
+                if (origId !== undefined) {
+                    $(this).attr('data-current-id', origId);
+                }
+            });
+
+            // 更新按钮状态为默认状态（假设有上一条和下一条）
+            ModalNavigationManager.updateButtonStates(modalDom, true, true);
+
+            // 重新加载模态框内容以显示原始记录
+            this.reloadOriginalContent(modalDom);
+        }
+    },
+
+    // 重新加载原始内容
+    reloadOriginalContent(modalDom) {
+        const infoDom = modalDom.find('.modal-body .button-modal-body-info');
+
+        // 使用第一个导航按钮来构建原始内容URL
+        const firstNavBtn = modalDom.find('.qscmf_modal_nav_btn:first');
+        if (firstNavBtn.length > 0) {
+            const idKey = firstNavBtn.attr('data-id-key') || 'id';
+            const origId = firstNavBtn.attr('data-original-id') || firstNavBtn.attr('data-current-id');
+            const baseUrl = firstNavBtn.attr('href');
+
+            if (baseUrl) {
+                const url = this.buildOriginalContentUrl(baseUrl, idKey, origId, 'original');
+
+                modalDom.find('.preloader').removeClass('hidden');
+                infoDom.html('');
+
+                // 使用共享的 ajaxPromise 和 loadedPromise 函数
+                if (typeof ajaxPromise === 'function') {
+                    ajaxPromise(url).then(function(res){
+                        modalDom.find('.preloader').addClass('hidden');
+                        var mainDom = $("<div>" + res.info + "</div>");
+                        var scriptSrcDom = mainDom.find('script[src]');
+
+                        return loadedPromise(scriptSrcDom, infoDom, mainDom);
+                    }).then(function(dom){
+                        infoDom.html(dom.html());
+                        // 使用共享的 injectSubmitTargetFormClass 函数
+                        if (typeof injectSubmitTargetFormClass === 'function') {
+                            injectSubmitTargetFormClass(modalDom);
+                        }
+                    }).catch(function(res){
+                        console.log(res);
+                        alert(res.info || '错误，请联系管理员');
+                    });
+                }
+            }
+        }
+    },
+
+    // 构建原始内容请求URL
+    buildOriginalContentUrl(baseUrl, idKey, currentId) {
+        const url = new URL(baseUrl, window.location.origin);
+        url.searchParams.set(idKey, currentId);
+        url.searchParams.set('operate_type', 'original');
+        return url.toString();
     }
 };
 

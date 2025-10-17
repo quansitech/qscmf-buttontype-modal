@@ -148,3 +148,12 @@ $(document).on('shown.bs.modal', '.qs-button-type-modal', function() {
         console.warn('ModalNavigation not available, navigation buttons may not work');
     }
 });
+
+// 在模态框隐藏时重置导航状态
+$(document).on('hidden.bs.modal', '.qs-button-type-modal', function() {
+    if (window.ModalNavigation && typeof window.ModalNavigation.updater.resetNavigationState === 'function') {
+        window.ModalNavigation.updater.resetNavigationState($(this));
+    } else {
+        console.warn('ModalNavigation not available, navigation buttons may not work');
+    }
+});

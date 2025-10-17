@@ -3,6 +3,42 @@
  * 基于按钮的 data-current-id 属性管理状态，降低与表单的耦合
  */
 
+// URL 构建器 - 提取公共逻辑
+const ModalUrlBuilder = {
+    // 构建导航请求URL
+    buildNavigationUrl(baseUrl, idKey, currentId, operateType) {
+        if (!baseUrl) {
+            throw new Error('baseUrl is required');
+        }
+        
+        const url = new URL(baseUrl, window.location.origin);
+        url.searchParams.set(idKey, currentId);
+        url.searchParams.set('operate_type', operateType);
+        return url.toString();
+    }
+};
+
+// DOM 缓存管理器 - 优化 DOM 操作性能
+class DomCacheManager {
+    constructor(modalDom) {
+        this.modalDom = modalDom;
+        this.cache = new Map();
+    }
+    
+    // 获取缓存的 DOM 元素
+    getCachedElement(selector) {
+        if (!this.cache.has(selector)) {
+            this.cache.set(selector, this.modalDom.find(selector));
+        }
+        return this.cache.get(selector);
+    }
+    
+    // 清除缓存
+    clearCache() {
+        this.cache.clear();
+    }
+}
+
 // 导航状态管理器
 const ModalNavigationManager = {
     // 获取当前ID（从按钮属性）
@@ -39,14 +75,6 @@ const ModalNavigationManager = {
         // 更新禁用状态
         prevBtn.prop('disabled', !hasPrev);
         nextBtn.prop('disabled', !hasNext);
-        
-        // 更新视觉样式
-        prevBtn.toggleClass('btn-secondary', !hasPrev).toggleClass('btn-primary', hasPrev);
-        nextBtn.toggleClass('btn-secondary', !hasNext).toggleClass('btn-primary', hasNext);
-        
-        // 更新提示文本
-        prevBtn.attr('title', hasPrev ? '上一条' : '已经是第一条');
-        nextBtn.attr('title', hasNext ? '下一条' : '已经是最后一条');
     }
 };
 
@@ -93,9 +121,6 @@ const ModalContentUpdater = {
                 }
             });
 
-            // 更新按钮状态为默认状态（假设有上一条和下一条）
-            ModalNavigationManager.updateButtonStates(modalDom, true, true);
-
             // 重新加载模态框内容以显示原始记录
             this.reloadOriginalContent(modalDom);
         }
@@ -113,7 +138,7 @@ const ModalContentUpdater = {
             const baseUrl = firstNavBtn.attr('href');
 
             if (baseUrl) {
-                const url = this.buildOriginalContentUrl(baseUrl, idKey, origId, 'original');
+                const url = ModalUrlBuilder.buildNavigationUrl(baseUrl, idKey, origId, 'original');
 
                 modalDom.find('.preloader').removeClass('hidden');
                 infoDom.html('');
@@ -139,14 +164,6 @@ const ModalContentUpdater = {
                 }
             }
         }
-    },
-
-    // 构建原始内容请求URL
-    buildOriginalContentUrl(baseUrl, idKey, currentId) {
-        const url = new URL(baseUrl, window.location.origin);
-        url.searchParams.set(idKey, currentId);
-        url.searchParams.set('operate_type', 'original');
-        return url.toString();
     }
 };
 
@@ -154,10 +171,13 @@ const ModalContentUpdater = {
 class ModalNavigation {
     constructor() {
         this.isProcessing = false;
+        this.domCache = null;
     }
     
     // 初始化导航功能
     init(modalDom) {
+        // 初始化 DOM 缓存
+        this.domCache = new DomCacheManager(modalDom);
         this.bindNavigationButtons(modalDom);
     }
     
@@ -214,21 +234,18 @@ class ModalNavigation {
         return {
             idKey,
             currentId,
-            url: this.buildRequestUrl(baseUrl, idKey, currentId, operateType)
+            url: ModalUrlBuilder.buildNavigationUrl(baseUrl, idKey, currentId, operateType)
         };
-    }
-    
-    // 构建请求URL
-    buildRequestUrl(baseUrl, idKey, currentId, operateType) {
-        const url = new URL(baseUrl, window.location.origin);
-        url.searchParams.set(idKey, currentId);
-        url.searchParams.set('operate_type', operateType);
-        return url.toString();
     }
     
     // 发送导航请求
     sendNavigationRequest(url) {
         return new Promise((resolve, reject) => {
+            if (typeof ajaxPromise !== 'function') {
+                reject(new Error('ajaxPromise function is not available'));
+                return;
+            }
+            
             ajaxPromise(url).then(resolve).catch(reject);
         });
     }
@@ -254,8 +271,13 @@ class ModalNavigation {
     
     // 设置加载状态
     setLoadingState(modalDom, isLoading) {
-        const preloader = modalDom.find('.preloader');
-        const buttons = modalDom.find('.qscmf_modal_nav_btn');
+        const preloader = this.domCache ? 
+            this.domCache.getCachedElement('.preloader') : 
+            modalDom.find('.preloader');
+            
+        const buttons = this.domCache ? 
+            this.domCache.getCachedElement('.qscmf_modal_nav_btn') : 
+            modalDom.find('.qscmf_modal_nav_btn');
         
         if (isLoading) {
             preloader.removeClass('hidden');
@@ -281,9 +303,11 @@ function bindPrevNextButtons(modalDom) {
     modalNavigation.init(modalDom);
 }
 
-// 导出其他可能需要的功能
+// 统一导出方式
 window.ModalNavigation = {
     bindPrevNextButtons,
     manager: ModalNavigationManager,
-    updater: ModalContentUpdater
+    updater: ModalContentUpdater,
+    urlBuilder: ModalUrlBuilder,
+    navigation: modalNavigation
 };

@@ -121,18 +121,23 @@ class ModalButtonBuilder
         return $this;
     }
 
-    /**
-     * 添加上一条按钮
-     * @param string $title 按钮标题
-     * @param array $attribute 按钮属性
-     * @param mixed $current_id 当前记录ID
-     * @param string $id_key 主键字段名，默认为'id'
-     * @return $this
-     */
-    public function addPrevButton($title, $attribute, $current_id = null, $id_key = 'id'){
-        if (!isset($attribute['class'])) {
-            $attribute['class'] = '';
+    public function addPrevButton($href, $current_id, $title = '', $attribute = [], $id_key = 'id'){
+        if (empty($title)) {
+            $title = '上一条';
         }
+
+        if (!isset($attribute['type'])) {
+            $attribute['type'] = 'button';
+        }
+        
+        if (!isset($attribute['class'])) {
+            $attribute['class'] = 'btn btn-primary ';
+        }
+        
+        if (!isset($attribute['href'])) {
+            $attribute['href'] = $href;
+        }
+
         $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_prev_btn';
         $attribute['data-current-id'] = $current_id;
         $attribute['data-original-id'] = $current_id;
@@ -140,19 +145,24 @@ class ModalButtonBuilder
         $attribute['data-operate-type'] = 'prev';
         return $this->addFooterButton($title, $attribute);
     }
-
-    /**
-     * 添加下一条按钮
-     * @param string $title 按钮标题
-     * @param array $attribute 按钮属性
-     * @param mixed $current_id 当前记录ID
-     * @param string $id_key 主键字段名，默认为'id'
-     * @return $this
-     */
-    public function addNextButton($title, $attribute, $current_id = null, $id_key = 'id'){
-        if (!isset($attribute['class'])) {
-            $attribute['class'] = '';
+    
+    public function addNextButton($href, $current_id, $title = '', $attribute = [], $id_key = 'id'){
+        if (empty($title)) {
+            $title = '下一条';
         }
+
+        if (!isset($attribute['type'])) {
+            $attribute['type'] = 'button';
+        }
+
+        if (!isset($attribute['class'])) {
+           $attribute['class'] = 'btn btn-primary ';
+        }
+        
+        if (!isset($attribute['href'])) {
+            $attribute['href'] = $href;
+        }
+
         $attribute['class'] .= ' qscmf_modal_nav_btn qscmf_modal_nav_next_btn';
         $attribute['data-current-id'] = $current_id;
         $attribute['data-original-id'] = $current_id;

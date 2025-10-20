@@ -210,6 +210,71 @@ composer require quansitech/qscmf-buttontype-modal
   
     ```
 
++ 添加上一条/下一条切换按钮
+  + 添加切换按钮，可自定义标题及其样式
+  + 接口需返回表单HTML并处理切换失败的情况
+  + 用法
+      
+    ```php
+    public function edit($id=null) {
+        $modal = (new \Qs\ModalButton\ModalButtonBuilder());
+        
+        return $modal
+            ->setTitle('审核')
+            ->setBackdrop(false)
+            ->setKeyboard(false)
+            ->bindFormBuilder($this->edit($id))
+            // 添加切换按钮，使用默认的按钮配置
+            ->addPrevButton(U('edit'), $id)
+            
+            // 添加切换按钮，可自定义标题及其样式
+            ->addNextButton(U('edit'), $id, "下一条", ['type' => 'button', 'class' => 'btn btn-secondary', 
+              'href' => U('edit')], 'id')
+            ;
+    }
+
+    public function edit($id=null) {
+        if (IS_POST) {
+            // 省略其他业务逻辑处理
+        } else {
+            $operate_type = I("get.operate_type");
+            [$map, $order] = match($operate_type){
+                'prev' => [['id' => ['LT', $id]], "id desc"],
+                'next' => [['id' => ['GT', $id]], "id desc"],
+                default => [['id' => ['EQ', $id]], "id desc"],
+            };
+
+            $info = D('User')->where($map)->order($order)->find();
+            if($operate_type && $operate_type!=='original' empty($info)){
+              $error =   match($operate_type){
+                'prev' => "已经是第一条",
+                'next' => "已经是最后一条",
+              };
+              $this->ajaxReturn(['status' => 0, 'info' => $error]);
+            }
+
+            $builder = new \Qscmf\Builder\FormBuilder();
+            
+            // 省略添加表单字段
+            $this->addBuilderFormItem($builder);
+
+            $builder->setMetaTitle('')
+                ->setPostUrl(U('edit'))
+                ->addFormItem('id', 'hidden', 'ID')
+                ->setFormData($info)
+                ->setShowBtn(false);
+
+            if(empty($operate_type)){
+                return $builder;
+            }else{
+                // 关键：返回构建好的 HTML 字符串
+
+                $this->ajaxReturn(['status' => 1, 'info' => $builder->build(true)]);
+            }
+        }
+    }
+    ```
+
 #### 升级指南
 
 [升级指南](https://github.com/quansitech/qscmf-buttontype-modal/blob/master/Upgrade.md)

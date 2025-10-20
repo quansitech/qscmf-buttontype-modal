@@ -267,3 +267,33 @@ public function genModalForm(){
 // FormBuilder $builder
 ->bindFormBuilder($builder)
 ```
+
+#### addPrevButton
+```text
+添加上一条按钮
+```
+```php
+// 参数说明
+// string $href 表单接口
+// int|string $current_id 当前记录ID
+// string $title 按钮标题
+// array $attribute 按钮属性
+// string $id_key 主键字段名，默认为'id'
+
+->addPrevButton($href, $current_id, $title, $attribute, $id_key)
+```
+
+#### addNextButton
+```text
+添加上一条按钮
+```
+```php
+// 参数说明
+// string $href 表单接口
+// int|string $current_id 当前记录ID
+// string $title 按钮标题
+// array $attribute 按钮属性
+// string $id_key 主键字段名，默认为'id'
+
+->addNextButton($href, $current_id, $title, $attribute, $id_key)
+```

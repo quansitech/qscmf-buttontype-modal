@@ -43,14 +43,11 @@ class DomCacheManager {
 const ModalNavigationManager = {
     // 获取当前ID（从按钮属性）
     getCurrentId(button) {
-        console.log('getCurrentId',  button.attr('data-current-id'));
         return button.attr('data-current-id') || '';
     },
     
     // 更新当前ID（到按钮属性）
     updateCurrentId(button, newId) {
-        console.log('updateCurrentId',  newId);
-
         button.attr('data-current-id', newId);
         return newId;
     },
@@ -58,7 +55,6 @@ const ModalNavigationManager = {
     // 同步更新所有相关按钮的当前ID
     syncCurrentId(modalDom, newId) {
         modalDom.find('.qscmf_modal_nav_btn').each(function() {
-            console.log('syncCurrentId',  newId);
 
             ModalNavigationManager.updateCurrentId($(this), newId);
         });
@@ -69,12 +65,9 @@ const ModalNavigationManager = {
     updateButtonStates(modalDom, hasPrev, hasNext) {
         const prevBtn = modalDom.find('.qscmf_modal_nav_prev_btn');
         const nextBtn = modalDom.find('.qscmf_modal_nav_next_btn');
-
-        console.log('updateButtonStates', prevBtn, hasPrev, nextBtn, hasNext);
         
-        // 更新禁用状态
-        prevBtn.prop('disabled', hasPrev === 0);
-        nextBtn.prop('disabled', hasNext === 0);
+        prevBtn.toggleClass('disabled', hasPrev === 0);
+        nextBtn.toggleClass('disabled', hasNext === 0);
     }
 };
 
@@ -261,11 +254,11 @@ class ModalNavigation {
             ModalNavigationManager.syncCurrentId(modalDom, response[idKey]);
             
             // 更新按钮状态
-            ModalNavigationManager.updateButtonStates(
-                modalDom, 
-                response?.has_prev, 
-                response?.has_next
-            );
+            // ModalNavigationManager.updateButtonStates(
+            //     modalDom, 
+            //     response?.has_prev, 
+            //     response?.has_next
+            // );
         }
     }
     

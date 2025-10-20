@@ -60,7 +60,7 @@ const ModalNavigationManager = {
         modalDom.find('.qscmf_modal_nav_btn').each(function() {
             console.log('syncCurrentId',  newId);
 
-            this.updateCurrentId($(this), newId);
+            ModalNavigationManager.updateCurrentId($(this), newId);
         });
         return newId;
     },
